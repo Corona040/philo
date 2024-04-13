@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:26 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/10 19:31:28 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/04/12 17:50:25 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,17 +35,18 @@
 
 typedef struct s_args
 {
-	int	n_philo;
-	int	tt_die;
-	int	tt_eat;
-	int	tt_sleep;
-	int	n_eat;
+	size_t	n_philo;
+	size_t	tt_die;
+	size_t	tt_eat;
+	size_t	tt_sleep;
+	size_t	n_eat;
 }	t_args;
 
 typedef struct s_philo
 {
-	int		philo_id;
-	t_args	*args;
+	pthread_t	thread_id;
+	size_t		num;
+	t_args		*args;
 }	t_philo;
 
 #endif
