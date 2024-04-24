@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/13 10:54:47 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/24 10:27:13 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/04/24 10:31:09 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ int	p_eat(t_philo *philo)
 	size_t	ms;
 
 	ms = ft_getmsofday();
-	philo->die_time = ms - philo->t0 + philo->tt_die;
+	philo->die_time = ms - philo->t0 + philo->args->tt_die;
 	printf("%5i %3i is eating\n", (int)ms - (int)philo->t0, (int)philo->num);
 	ft_msleep(philo->args->tt_eat);
 	pthread_mutex_unlock(philo->lfork);

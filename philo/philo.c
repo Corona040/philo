@@ -1,17 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.c                                         /      \   /      \      */
+/*   philo.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:11 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/24 15:32:36 by eco                 \__/   \__/          */
+/*   Updated: 2024/04/24 18:00:28 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-#include <cstddef>
 
 int	main(int argc, char **argv)
 {
@@ -19,7 +18,7 @@ int	main(int argc, char **argv)
 	int				*args_array;
 	static t_args	args;
 	t_philo			*philos;
-	size_t			t0;
+	// size_t			t0;
 	pthread_mutex_t	*forks;
 
 	if (argc != 5 && argc != 6)
@@ -64,10 +63,11 @@ int	main(int argc, char **argv)
 		pthread_mutex_init(forks + 1, NULL);
 	}
 	i = 0;
-	t0 = ft_getmsofday();
+	// t0 = ft_getmsofft_getmsofday()y();
 	while (i < (int)args.n_philo)
 	{
-		philos[i].t0 = t0;
+		philos[i].t0 = ft_getmsofday();
+		philos[i].die_time = philos[i].args->tt_die;
 		pthread_create(&philos[i].thread_id, NULL, routine, (void *)(&philos[i]));
 		usleep(10);
 		i++;
@@ -77,16 +77,16 @@ int	main(int argc, char **argv)
 	while (!has_died(philos))
 		(void)main;
 	// TODO destroy or detach threads
-	while (i < (int)args.n_philo)
-	{
-		pthread_join(philos[i].thread_id, NULL);
-		i++;
-	}
-	while (i < (int)args.n_philo)
-	{
-		pthread_mutex_destroy(philos[i].lfork);
-		pthread_mutex_destroy(philos[i].rfork);
-	}
+	// while (i < (int)args.n_philo)
+	// {
+	// 	pthread_join(philos[i].thread_id, NULL);
+	// 	i++;
+	// }
+	// while (i < (int)args.n_philo)
+	// {
+	// 	pthread_mutex_destroy(philos[i].lfork);
+	// 	pthread_mutex_destroy(philos[i].rfork);
+	// }
 	return (0);
 }
 
@@ -96,14 +96,19 @@ int	has_died(t_philo *philos)
 	size_t	ms;
 
 	i = 0;
-	while (i < philos[i].args->n_philo)
+	while (1)
 	{
 		ms = ft_getmsofday();
 		if (philos[i].die_time < ms - philos[i].t0)
+		{
+			printf("%5i %3i has died\n", (int)ms - (int)philos[i].t0, (int)philos[i].num);
 			return (1);
-		i++;
+		}
+		if (i == (int)philos[i].args->n_philo - 1)
+			i = 0;
+		else
+			i++;
 	}
-	return (0);
 }
 
 size_t	ft_getmsofday(void)
