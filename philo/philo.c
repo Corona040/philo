@@ -1,16 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.c                                            :+:      :+:    :+:   */
+/*   philo.c                                         /      \   /      \      */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:11 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/24 10:27:39 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/04/24 15:32:36 by eco                 \__/   \__/          */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+#include <cstddef>
 
 int	main(int argc, char **argv)
 {
@@ -73,6 +74,9 @@ int	main(int argc, char **argv)
 	}
 	i = 0;
 	// MONITOR DEATHS
+	while (!has_died(philos))
+		(void)main;
+	// TODO destroy or detach threads
 	while (i < (int)args.n_philo)
 	{
 		pthread_join(philos[i].thread_id, NULL);
@@ -82,6 +86,22 @@ int	main(int argc, char **argv)
 	{
 		pthread_mutex_destroy(philos[i].lfork);
 		pthread_mutex_destroy(philos[i].rfork);
+	}
+	return (0);
+}
+
+int	has_died(t_philo *philos)
+{
+	int		i;
+	size_t	ms;
+
+	i = 0;
+	while (i < philos[i].args->n_philo)
+	{
+		ms = ft_getmsofday();
+		if (philos[i].die_time < ms - philos[i].t0)
+			return (1);
+		i++;
 	}
 	return (0);
 }

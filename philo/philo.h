@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.h                                            :+:      :+:    :+:   */
+/*   philo.h                                         /      \   /      \      */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:26 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/24 10:20:19 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/04/24 15:31:10 by eco                 \__/   \__/          */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ typedef struct s_philo
 	pthread_mutex_t	*rfork;
 	size_t			t0;
 	int				eat_count;
-	int				is_alive;
+	// int				is_alive;
 	size_t			die_time;
 }	t_philo;
 
@@ -63,5 +63,6 @@ void	*get_lfork(void *arg);
 void	*get_rfork(void *arg);
 int		p_sleep(t_philo *philo);
 int		p_eat(t_philo *philo);
+int		has_died(t_philo *philos);
 
 #endif
