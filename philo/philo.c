@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:11 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/24 18:00:28 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/04/24 18:28:47 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,8 +74,7 @@ int	main(int argc, char **argv)
 	}
 	i = 0;
 	// MONITOR DEATHS
-	while (!has_died(philos))
-		(void)main;
+	has_died(philos);
 	// TODO destroy or detach threads
 	// while (i < (int)args.n_philo)
 	// {
