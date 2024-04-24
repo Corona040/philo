@@ -6,14 +6,11 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/13 10:54:47 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/13 14:45:42 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/04/24 10:27:13 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-
-extern pthread_mutex_t	lock_lfork;
-extern pthread_mutex_t	lock_rfork;
 
 int	get_forks(t_philo *philo)
 {
@@ -33,13 +30,9 @@ void	*get_lfork(void *arg)
 	size_t	ms;
 
 	philo = (t_philo *)arg;
-	while (*(philo->lfork) != 0)
-		usleep(500);
-	pthread_mutex_lock(&lock_lfork);
+	pthread_mutex_lock(philo->lfork);
 	ms = ft_getmsofday();
-	*(philo->lfork) = philo->num;
 	printf("%5i %3i has taken a fork\n", (int)ms - (int)philo->t0, (int)philo->num);
-	pthread_mutex_unlock(&lock_lfork);
 	return (0);
 }
 
@@ -49,19 +42,14 @@ void	*get_rfork(void *arg)
 	size_t	ms;
 
 	philo = (t_philo *)arg;
-	while (*(philo->rfork) != 0)
-		usleep(500);
-	pthread_mutex_lock(&lock_rfork);
+	pthread_mutex_lock(philo->rfork);
 	ms = ft_getmsofday();
-	*(philo->rfork) = philo->num;
 	printf("%5i %3i has taken a fork\n", (int)ms - (int)philo->t0, (int)philo->num);
-	pthread_mutex_unlock(&lock_rfork);
 	return (0);
 }
 
-int p_sleep(t_philo *philo)
+int	p_sleep(t_philo *philo)
 {
-	// t_philo	*philo;
 	size_t	ms;
 
 	ms = ft_getmsofday();
@@ -72,16 +60,16 @@ int p_sleep(t_philo *philo)
 	return (0);
 }
 
-int p_eat(t_philo *philo)
+int	p_eat(t_philo *philo)
 {
-	// t_philo	*philo;
 	size_t	ms;
 
 	ms = ft_getmsofday();
+	philo->die_time = ms - philo->t0 + philo->tt_die;
 	printf("%5i %3i is eating\n", (int)ms - (int)philo->t0, (int)philo->num);
 	ft_msleep(philo->args->tt_eat);
-	*(philo->lfork) = 0;
-	*(philo->rfork) = 0;
-	philo->eat_counter++;
+	pthread_mutex_unlock(philo->lfork);
+	pthread_mutex_unlock(philo->rfork);
+	philo->eat_count++;
 	return (0);
 }

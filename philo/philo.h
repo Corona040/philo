@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:26 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/13 11:36:54 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/04/24 10:20:19 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,22 +44,24 @@ typedef struct s_args
 
 typedef struct s_philo
 {
-	pthread_t	thread_id;
-	size_t		num;
-	t_args		*args;
-	int			*lfork;
-	int			*rfork;
-	size_t		t0;
-	int			eat_counter;
+	pthread_t		thread_id;
+	size_t			num;
+	t_args			*args;
+	pthread_mutex_t	*lfork;
+	pthread_mutex_t	*rfork;
+	size_t			t0;
+	int				eat_count;
+	int				is_alive;
+	size_t			die_time;
 }	t_philo;
 
-size_t	ft_getmsofday();
-int	ft_msleep(size_t ms);
+size_t	ft_getmsofday(void);
+int		ft_msleep(size_t ms);
 void	*routine(void *arg);
-int	get_forks(t_philo *philo);
+int		get_forks(t_philo *philo);
 void	*get_lfork(void *arg);
 void	*get_rfork(void *arg);
-int p_sleep(t_philo *philo);
-int p_eat(t_philo *philo);
+int		p_sleep(t_philo *philo);
+int		p_eat(t_philo *philo);
 
 #endif
