@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/13 10:54:47 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/24 10:31:09 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/04/25 12:06:57 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	*get_lfork(void *arg)
 	philo = (t_philo *)arg;
 	pthread_mutex_lock(philo->lfork);
 	ms = ft_getmsofday();
-	printf("%5i %3i has taken a fork\n", (int)ms - (int)philo->t0, (int)philo->num);
+	print_fork(philo->print[0], ms - philo->t0, philo->num);
 	return (0);
 }
 
@@ -44,8 +44,15 @@ void	*get_rfork(void *arg)
 	philo = (t_philo *)arg;
 	pthread_mutex_lock(philo->rfork);
 	ms = ft_getmsofday();
-	printf("%5i %3i has taken a fork\n", (int)ms - (int)philo->t0, (int)philo->num);
+	print_fork(philo->print[0], ms - philo->t0, philo->num);
 	return (0);
+}
+
+void	print_fork(pthread_mutex_t *print, int time, int num)
+{
+	pthread_mutex_lock(print);
+	printf("%5i %3i has taken a fork\n", time, num);
+	pthread_mutex_unlock(print);
 }
 
 int	p_sleep(t_philo *philo)
@@ -53,11 +60,25 @@ int	p_sleep(t_philo *philo)
 	size_t	ms;
 
 	ms = ft_getmsofday();
-	printf("%5i %3i is sleeping\n", (int)ms - (int)philo->t0, (int)philo->num);
+	print_sleep(philo->print[1], ms - philo->t0, philo->num);
 	ft_msleep(philo->args->tt_sleep);
 	ms = ft_getmsofday();
-	printf("%5i %3i is thinking\n", (int)ms - (int)philo->t0, (int)philo->num);
+	print_think(philo->print[2], ms - philo->t0, philo->num);
 	return (0);
+}
+
+void	print_sleep(pthread_mutex_t *print, int time, int num)
+{
+	pthread_mutex_lock(print);
+	printf("%5i %3i is sleeping\n", time, num);
+	pthread_mutex_unlock(print);
+}
+
+void	print_think(pthread_mutex_t *print, int time, int num)
+{
+	pthread_mutex_lock(print);
+	printf("%5i %3i is thinking\n", time, num);
+	pthread_mutex_unlock(print);
 }
 
 int	p_eat(t_philo *philo)
@@ -66,10 +87,17 @@ int	p_eat(t_philo *philo)
 
 	ms = ft_getmsofday();
 	philo->die_time = ms - philo->t0 + philo->args->tt_die;
-	printf("%5i %3i is eating\n", (int)ms - (int)philo->t0, (int)philo->num);
+	print_eat(philo->print[3], ms - philo->t0, philo->num);
 	ft_msleep(philo->args->tt_eat);
 	pthread_mutex_unlock(philo->lfork);
 	pthread_mutex_unlock(philo->rfork);
 	philo->eat_count++;
 	return (0);
+}
+
+void	print_eat(pthread_mutex_t *print, int time, int num)
+{
+	pthread_mutex_lock(print);
+	printf("%5i %3i is eating\n", time, num);
+	pthread_mutex_unlock(print);
 }

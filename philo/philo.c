@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:11 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/24 18:28:47 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/04/25 11:57:42 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ int	main(int argc, char **argv)
 	t_philo			*philos;
 	// size_t			t0;
 	pthread_mutex_t	*forks;
+	pthread_mutex_t *print;
 
 	if (argc != 5 && argc != 6)
 		return (0);
@@ -43,6 +44,7 @@ int	main(int argc, char **argv)
 		forks = malloc(args.n_philo * sizeof(pthread_mutex_t));
 	else
 		forks = malloc(2 * sizeof(pthread_mutex_t));
+	print = malloc(4 * sizeof(pthread_mutex_t));
 	i = 0;
 	while (i < (int)args.n_philo)
 	{
@@ -50,6 +52,7 @@ int	main(int argc, char **argv)
 		philos[i].eat_count = 0;
 		philos[i].args = &args;
 		philos[i].rfork = forks + i;
+		philos[i].print = &print;
 		pthread_mutex_init(forks + i, NULL);
 		if (i > 0)
 			philos[i].lfork = forks + i - 1;

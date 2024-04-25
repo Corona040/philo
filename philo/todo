@@ -1,3 +1,5 @@
 first odd and then even philos (best for no philo to die)
 	dying: have a monitoring function to check if time_now > last_time_eat
 PROTECT PRINTF's
+
+Handle optional argument
