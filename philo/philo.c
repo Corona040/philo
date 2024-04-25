@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:11 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/25 11:57:42 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/04/25 14:34:53 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int	main(int argc, char **argv)
 	t_philo			*philos;
 	// size_t			t0;
 	pthread_mutex_t	*forks;
-	pthread_mutex_t *print;
+	pthread_mutex_t print;
 
 	if (argc != 5 && argc != 6)
 		return (0);
@@ -44,7 +44,6 @@ int	main(int argc, char **argv)
 		forks = malloc(args.n_philo * sizeof(pthread_mutex_t));
 	else
 		forks = malloc(2 * sizeof(pthread_mutex_t));
-	print = malloc(4 * sizeof(pthread_mutex_t));
 	i = 0;
 	while (i < (int)args.n_philo)
 	{
@@ -73,11 +72,20 @@ int	main(int argc, char **argv)
 		philos[i].die_time = philos[i].args->tt_die;
 		pthread_create(&philos[i].thread_id, NULL, routine, (void *)(&philos[i]));
 		usleep(10);
-		i++;
+		i += 2;
+	}
+	i = 1;
+	while (i < (int)args.n_philo)
+	{
+		philos[i].t0 = ft_getmsofday();
+		philos[i].die_time = philos[i].args->tt_die;
+		pthread_create(&philos[i].thread_id, NULL, routine, (void *)(&philos[i]));
+		usleep(10);
+		i += 2;
 	}
 	i = 0;
 	// MONITOR DEATHS
-	has_died(philos);
+	monitor(philos);
 	// TODO destroy or detach threads
 	// while (i < (int)args.n_philo)
 	// {
@@ -92,11 +100,13 @@ int	main(int argc, char **argv)
 	return (0);
 }
 
-int	has_died(t_philo *philos)
+int	monitor(t_philo *philos)
 {
 	int		i;
 	size_t	ms;
+	int		full_tummies;
 
+	full_tummies = 1;
 	i = 0;
 	while (1)
 	{
@@ -106,11 +116,21 @@ int	has_died(t_philo *philos)
 			printf("%5i %3i has died\n", (int)ms - (int)philos[i].t0, (int)philos[i].num);
 			return (1);
 		}
+		if (philos[i].eat_count < philos[i].args->n_eat || philos[i].args->n_eat == 0)
+			full_tummies = 0;
 		if (i == (int)philos[i].args->n_philo - 1)
+		{
 			i = 0;
+			if (full_tummies == 1)
+				break;
+		}
 		else
+		{
 			i++;
+			full_tummies = 1;
+		}
 	}
+	return (0);
 }
 
 size_t	ft_getmsofday(void)
@@ -144,6 +164,8 @@ void	*routine(void *arg)
 	{
 		get_forks(philo);
 		p_eat(philo);
+		if (philo->eat_count == philo->args->n_eat)
+			break;
 		p_sleep(philo);
 	}
 	return (0);

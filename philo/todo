@@ -3,3 +3,5 @@ first odd and then even philos (best for no philo to die)
 PROTECT PRINTF's
 
 Handle optional argument
+
+If philosopher has eaten enough times, can he still die?
