@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:11 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/25 14:34:53 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/04/27 20:15:52 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ int	main(int argc, char **argv)
 		forks = malloc(args.n_philo * sizeof(pthread_mutex_t));
 	else
 		forks = malloc(2 * sizeof(pthread_mutex_t));
+	pthread_mutex_init(&print, NULL);
 	i = 0;
 	while (i < (int)args.n_philo)
 	{
@@ -165,7 +166,7 @@ void	*routine(void *arg)
 		get_forks(philo);
 		p_eat(philo);
 		if (philo->eat_count == philo->args->n_eat)
-			break;
+			break ;
 		p_sleep(philo);
 	}
 	return (0);
