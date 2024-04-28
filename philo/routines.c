@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/13 10:54:47 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/25 14:26:15 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/04/28 14:35:13 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,13 @@ void	*get_lfork(void *arg)
 	size_t	ms;
 
 	philo = (t_philo *)arg;
-	pthread_mutex_lock(philo->lfork);
-	ms = ft_getmsofday();
-	print_fork(philo->print, ms - philo->t0, philo->num);
+	if (philo->lfork)
+	{
+		ms = ft_getmsofday();
+		print_fork(philo->print, ms - philo->t0, philo->num);
+	}
+	else
+		ft_msleep(philo->args->tt_die);
 	return (0);
 }
 
@@ -42,9 +46,13 @@ void	*get_rfork(void *arg)
 	size_t	ms;
 
 	philo = (t_philo *)arg;
-	pthread_mutex_lock(philo->rfork);
-	ms = ft_getmsofday();
-	print_fork(philo->print, ms - philo->t0, philo->num);
+	if (philo->rfork)
+	{
+		ms = ft_getmsofday();
+		print_fork(philo->print, ms - philo->t0, philo->num);
+	}
+	else
+		ft_msleep(philo->args->tt_die);
 	return (0);
 }
 
@@ -86,12 +94,14 @@ int	p_eat(t_philo *philo)
 	size_t	ms;
 
 	ms = ft_getmsofday();
+	pthread_mutex_lock(philo->monitor_mutex);
 	philo->die_time = ms - philo->t0 + philo->args->tt_die;
+	pthread_mutex_unlock(philo->monitor_mutex);
 	print_eat(philo->print, ms - philo->t0, philo->num);
 	ft_msleep(philo->args->tt_eat);
-	pthread_mutex_unlock(philo->lfork);
-	pthread_mutex_unlock(philo->rfork);
+	pthread_mutex_lock(philo->monitor_mutex);
 	philo->eat_count++;
+	pthread_mutex_unlock(philo->monitor_mutex);
 	return (0);
 }
 

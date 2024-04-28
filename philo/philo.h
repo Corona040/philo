@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:26 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/25 14:26:41 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/04/28 14:36:55 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ typedef struct s_philo
 	pthread_mutex_t	*lfork;
 	pthread_mutex_t	*rfork;
 	pthread_mutex_t	*print;
+	pthread_mutex_t	*monitor_mutex;
 	size_t			t0;
 	size_t			eat_count;
 	// int				is_alive;
@@ -64,7 +65,7 @@ void	*get_lfork(void *arg);
 void	*get_rfork(void *arg);
 int		p_sleep(t_philo *philo);
 int		p_eat(t_philo *philo);
-int		monitor(t_philo *philos);
+int		monitor(t_philo *philos, pthread_mutex_t *print);
 void	print_fork(pthread_mutex_t *print, int time, int num);
 void	print_sleep(pthread_mutex_t *print, int time, int num);
 void	print_think(pthread_mutex_t *print, int time, int num);

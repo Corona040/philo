@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:11 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/04/27 20:15:52 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/04/28 14:50:00 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ int	main(int argc, char **argv)
 	// size_t			t0;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t print;
+	pthread_mutex_t	*monitor_mutex;
 
 	if (argc != 5 && argc != 6)
 		return (0);
@@ -40,10 +41,8 @@ int	main(int argc, char **argv)
 	}
 	args = (t_args){args_array[0], args_array[1], args_array[2], args_array[3], args_array[4]};
 	philos = malloc(args.n_philo * sizeof(t_philo));
-	if (args.n_philo > 1)
-		forks = malloc(args.n_philo * sizeof(pthread_mutex_t));
-	else
-		forks = malloc(2 * sizeof(pthread_mutex_t));
+	forks = malloc(args.n_philo * sizeof(pthread_mutex_t));
+	monitor_mutex = malloc(args.n_philo * sizeof(pthread_mutex_t));
 	pthread_mutex_init(&print, NULL);
 	i = 0;
 	while (i < (int)args.n_philo)
@@ -53,7 +52,9 @@ int	main(int argc, char **argv)
 		philos[i].args = &args;
 		philos[i].rfork = forks + i;
 		philos[i].print = &print;
+		philos[i].monitor_mutex = monitor_mutex + i;
 		pthread_mutex_init(forks + i, NULL);
+		pthread_mutex_init(monitor_mutex + i, NULL);
 		if (i > 0)
 			philos[i].lfork = forks + i - 1;
 		i++;
@@ -61,10 +62,7 @@ int	main(int argc, char **argv)
 	if (args.n_philo > 1)
 		philos[0].lfork = forks + args.n_philo - 1;
 	else
-	{
-		philos[0].lfork = forks + 1;
-		pthread_mutex_init(forks + 1, NULL);
-	}
+		philos[0].lfork = 0;
 	i = 0;
 	// t0 = ft_getmsofft_getmsofday()y();
 	while (i < (int)args.n_philo)
@@ -72,7 +70,6 @@ int	main(int argc, char **argv)
 		philos[i].t0 = ft_getmsofday();
 		philos[i].die_time = philos[i].args->tt_die;
 		pthread_create(&philos[i].thread_id, NULL, routine, (void *)(&philos[i]));
-		usleep(10);
 		i += 2;
 	}
 	i = 1;
@@ -81,27 +78,28 @@ int	main(int argc, char **argv)
 		philos[i].t0 = ft_getmsofday();
 		philos[i].die_time = philos[i].args->tt_die;
 		pthread_create(&philos[i].thread_id, NULL, routine, (void *)(&philos[i]));
-		usleep(10);
 		i += 2;
 	}
-	i = 0;
 	// MONITOR DEATHS
-	monitor(philos);
+	monitor(philos, &print);
 	// TODO destroy or detach threads
-	// while (i < (int)args.n_philo)
-	// {
-	// 	pthread_join(philos[i].thread_id, NULL);
-	// 	i++;
-	// }
-	// while (i < (int)args.n_philo)
-	// {
-	// 	pthread_mutex_destroy(philos[i].lfork);
-	// 	pthread_mutex_destroy(philos[i].rfork);
-	// }
+	while (i < (int)args.n_philo)
+	{
+		pthread_join(philos[i].thread_id, NULL);
+		i++;
+	}
+	while (i < (int)args.n_philo)
+	{
+		pthread_mutex_destroy(philos[i].monitor_mutex);
+		pthread_mutex_destroy(philos[i].lfork);
+		pthread_mutex_destroy(philos[i].rfork);
+	}
+	pthread_mutex_unlock(&print);
+	pthread_mutex_destroy(&print);
 	return (0);
 }
 
-int	monitor(t_philo *philos)
+int	monitor(t_philo *philos, pthread_mutex_t *print)
 {
 	int		i;
 	size_t	ms;
@@ -112,13 +110,17 @@ int	monitor(t_philo *philos)
 	while (1)
 	{
 		ms = ft_getmsofday();
+		pthread_mutex_lock(philos->monitor_mutex);
 		if (philos[i].die_time < ms - philos[i].t0)
 		{
+			pthread_mutex_lock(print);
 			printf("%5i %3i has died\n", (int)ms - (int)philos[i].t0, (int)philos[i].num);
+			pthread_mutex_unlock(philos->monitor_mutex);
 			return (1);
 		}
 		if (philos[i].eat_count < philos[i].args->n_eat || philos[i].args->n_eat == 0)
 			full_tummies = 0;
+		pthread_mutex_unlock(philos->monitor_mutex);
 		if (i == (int)philos[i].args->n_philo - 1)
 		{
 			i = 0;
@@ -163,8 +165,16 @@ void	*routine(void *arg)
 	philo = (t_philo *)arg;
 	while (1)
 	{
+		if (philo->lfork)
+			pthread_mutex_lock(philo->lfork);
+		if (philo->rfork)
+			pthread_mutex_lock(philo->rfork);
 		get_forks(philo);
 		p_eat(philo);
+		if (philo->lfork)
+			pthread_mutex_unlock(philo->lfork);
+		if (philo->rfork)
+			pthread_mutex_unlock(philo->rfork);
 		if (philo->eat_count == philo->args->n_eat)
 			break ;
 		p_sleep(philo);
