@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:26 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/07 14:54:30 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/08 17:56:07 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,48 +26,35 @@
 // pthread_
 # include <pthread.h>
 
-// enum e_state
-// {
-// 	sleep,
-// 	eat,
-// 	die
-// };
+# define N_PHILO 0
+# define TT_DIE 1
+# define TT_EAT 2
+# define TT_SLEEP 3
+# define N_EAT 4
 
-typedef struct s_args
-{
-	size_t	n_philo;
-	size_t	tt_die;
-	size_t	tt_eat;
-	size_t	tt_sleep;
-	size_t	n_eat;
-}	t_args;
+# define FORK 0
+# define EAT 1
+# define SLEEP 2
+# define THINK 3
 
 typedef struct s_philo
 {
-	pthread_t		thread_id;
-	size_t			num;
-	t_args			*args;
-	pthread_mutex_t	*lfork;
-	pthread_mutex_t	*rfork;
-	pthread_mutex_t	*grab;
-	pthread_mutex_t	*monitor_mutex;
-	pthread_mutex_t	*print;
-	int				*can_print;
+	pthread_t		thread;
+	int				num;
+	size_t			*args;
+	pthread_mutex_t	*m_lfork;
+	pthread_mutex_t	*m_rfork;
+	pthread_mutex_t	*m_print;
+	pthread_mutex_t	*m_monitor;
+	int				eat_count;
 	size_t			t0;
-	size_t			eat_count;
 	size_t			die_time;
 }	t_philo;
 
 size_t	ft_getmsofday(void);
 int		ft_msleep(size_t ms);
 void	*routine(void *arg);
-int		get_forks(t_philo *philo);
-int		p_sleep(t_philo *philo);
-int		p_eat(t_philo *philo);
-int		monitor(t_philo *philos, pthread_mutex_t *print, int *can_print);
-void	print_fork(int *can_print, pthread_mutex_t *print, int time, int num);
-void	print_sleep(int *can_print, pthread_mutex_t *print, int time, int num);
-void	print_think(int *can_print, pthread_mutex_t *print, int time, int num);
-void	print_eat(int *can_print, pthread_mutex_t *print, int time, int num);
+void	print_action(t_philo *philo, int print_code);
+int		monitor(t_philo *philos, pthread_mutex_t *m_monitor);
 
 #endif
