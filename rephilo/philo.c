@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.c                                            :+:      :+:    :+:   */
+/*   philo.c                                         /      \   /      \      */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 14:52:56 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/13 15:20:38 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/14 17:15:05 by eco                 \__/   \__/          */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,10 @@ int	main(int argc, char **argv)
 	pthread_mutex_t	*m_grab;
 	pthread_mutex_t	*m_print;
 	pthread_mutex_t	*m_monitor;
+	pthread_mutex_t	*m_life;
 	size_t			ms;
 	int				*can_print;
+	int				*life;
 
 	if (argc != 5 && argc != 6)
 		return (0);
@@ -40,11 +42,15 @@ int	main(int argc, char **argv)
 	m_grab = malloc(sizeof(pthread_mutex_t));
 	m_print = malloc(sizeof(pthread_mutex_t));
 	m_monitor = malloc(sizeof(pthread_mutex_t));
+	m_life = malloc(sizeof(pthread_mutex_t));
 	can_print = malloc(sizeof(int));
+	life = malloc(sizeof(int));
 	i = 0;
 	*can_print = 1;
+	*life = 1;
 	pthread_mutex_init(m_print, NULL);
 	pthread_mutex_init(m_monitor, NULL);
+	pthread_mutex_init(m_life, NULL);
 	pthread_mutex_init(m_grab, NULL);
 	while (i < args[N_PHILO])
 	{
@@ -53,8 +59,10 @@ int	main(int argc, char **argv)
 		philos[i].m_rfork = m_forks + i;
 		philos[i].m_print = m_print;
 		philos[i].m_monitor = m_monitor;
+		philos[i].m_life = m_life;
 		philos[i].eat_count = 0;
 		philos[i].can_print = can_print;
+		philos[i].life = life;
 		philos[i].m_grab = m_grab;
 		if (i > 0)
 			philos[i].m_lfork = m_forks + i - 1;
@@ -81,28 +89,23 @@ int	main(int argc, char **argv)
 		i += 2;
 	}
 	i = 0;
-	if (monitor(philos, m_monitor, m_print, can_print))
-	{
-		while (i < args[N_PHILO])
-			pthread_detach(philos[i++].thread);
-	}
-	else
-	{
-		while (i < args[N_PHILO])
-			pthread_join(philos[i++].thread, NULL);
-	}
+	monitor(philos, m_monitor, m_print, m_life, can_print, life);
+	while (i < args[N_PHILO])
+		pthread_join(philos[i++].thread, NULL);
 	i = 0;
 	while (i < args[N_PHILO])
 		pthread_mutex_destroy(philos[i++].m_lfork);
 	pthread_mutex_destroy(m_print);
 	pthread_mutex_destroy(m_monitor);
 	pthread_mutex_destroy(m_grab);
+	pthread_mutex_destroy(m_life);
 	printf("HELLO\n");
 	free(philos);
 	free(m_forks);
 	free(m_print);
 	free(m_monitor);
 	free(can_print);
+	free(life);
 	return (0);
 }
 
@@ -118,13 +121,19 @@ size_t	ft_getmsofday(void)
 	return (ms);
 }
 
-int	ft_msleep(size_t ms)
+int	ft_msleep(size_t ms, t_philo *philo)
 {
 	size_t	t0;
 
 	t0 = ft_getmsofday();
 	while (ft_getmsofday() - t0 < ms)
+	{
+		pthread_mutex_lock(philo->m_life);
+		if (!*philo->life)
+			return (1);
+		pthread_mutex_unlock(philo->m_life);
 		usleep(500);
+	}
 	return (0);
 }
 
@@ -155,7 +164,8 @@ void	*routine(void *arg)
 		pthread_mutex_lock(philo->m_monitor);
 		philo->die_time = ft_getmsofday() - philo->t0 + philo->args[TT_DIE];
 		pthread_mutex_unlock(philo->m_monitor);
-		ft_msleep(philo->args[TT_EAT]);
+		if (ft_msleep(philo->args[TT_EAT], philo))
+			return (0);
 		pthread_mutex_lock(philo->m_monitor);
 		philo->eat_count++;
 		pthread_mutex_unlock(philo->m_monitor);
@@ -164,7 +174,8 @@ void	*routine(void *arg)
 		if (philo->eat_count == philo->args[N_EAT])
 			return (0);
 		print_action(philo, SLEEP);
-		ft_msleep(philo->args[TT_SLEEP]);
+		if (ft_msleep(philo->args[TT_SLEEP], philo))
+			return (0);
 		print_action(philo, THINK);
 	}
 	return (0);
@@ -192,7 +203,7 @@ void	print_action(t_philo *philo, int print_code)
 	pthread_mutex_unlock(philo->m_print);
 }
 
-int	monitor(t_philo *philos, pthread_mutex_t *m_monitor, pthread_mutex_t *m_print, int *can_print)
+int	monitor(t_philo *philos, pthread_mutex_t *m_monitor, pthread_mutex_t *m_print, pthread_mutex_t *m_life, int *can_print, int *life)
 {
 	int	i;
 	int	full_tummies;
@@ -205,6 +216,9 @@ int	monitor(t_philo *philos, pthread_mutex_t *m_monitor, pthread_mutex_t *m_prin
 		if (ft_getmsofday() - philos[i].t0 >= philos[i].die_time)
 		{
 			pthread_mutex_unlock(m_monitor);
+			pthread_mutex_lock(m_life);
+			*life = 0;
+			pthread_mutex_unlock(m_life);
 			pthread_mutex_lock(m_print);
 			*can_print = 0;
 			printf("%5lu %3i has died\n", ft_getmsofday() - philos[i].t0, philos[i].num + 1);
