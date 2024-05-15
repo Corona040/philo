@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.h                                            :+:      :+:    :+:   */
+/*   philo.h                                         /      \   /      \      */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:26 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/15 20:22:08 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/15 23:51:32 by eco                 \__/   \__/          */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,6 @@ typedef struct s_philo
 	pthread_mutex_t	*m_print;
 	pthread_mutex_t	*m_tummy;
 	pthread_mutex_t	*m_life;
-	pthread_mutex_t	*m_grab;
 	pthread_mutex_t	*m_sync;
 	int				eat_count;
 	size_t			*t0;
@@ -57,6 +56,17 @@ typedef struct s_philo
 	int				*life;
 	int				*update_ms;
 }	t_philo;
+
+typedef struct s_state
+{
+	pthread_mutex_t	*m_print;
+	pthread_mutex_t	*m_life;
+	pthread_mutex_t	*m_sync;
+	size_t			*ms;
+	int				*update_ms;
+	int				*can_print;
+	int				*life;
+}	t_state;
 
 size_t	ft_getmsofday(void);
 int		ft_msleep(size_t ms, t_philo *philo);

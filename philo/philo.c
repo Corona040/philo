@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.c                                            :+:      :+:    :+:   */
+/*   philo.c                                         /      \   /      \      */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 14:52:56 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/15 20:38:53 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/15 23:58:17 by eco                 \__/   \__/          */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,15 +18,8 @@ int	main(int argc, char **argv)
 	static size_t	args[5];
 	t_philo			*philos;
 	pthread_mutex_t	*m_forks;
-	pthread_mutex_t	*m_grab;
-	pthread_mutex_t	*m_print;
 	pthread_mutex_t	*m_tummies;
-	pthread_mutex_t	*m_life;
-	pthread_mutex_t	*m_sync;
-	size_t			*ms;
-	int				*update_ms;
-	int				*can_print;
-	int				*life;
+	t_state			state;
 
 	if (argc != 5 && argc != 6)
 		return (0);
@@ -37,49 +30,46 @@ int	main(int argc, char **argv)
 		if (i != 5 && args[i - 1] == 0)
 			return (0);
 	}
-	ms = malloc(sizeof(size_t));
+	state.ms = malloc(sizeof(size_t));
 	if (args[N_PHILO] == 1)
 	{
-		*ms = ft_getmsofday();
-		printf("%5lu %3i has taken a fork\n", ft_getmsofday() - *ms, 1);
+		*state.ms = ft_getmsofday();
+		printf("%5lu %3i has taken a fork\n", ft_getmsofday() - *state.ms, 1);
 		ft_msleep(args[TT_DIE], NULL);
-		printf("%5lu %3i has died\n", ft_getmsofday() - *ms, 1);
-		free(ms);
+		printf("%5lu %3i has died\n", ft_getmsofday() - *state.ms, 1);
+		free(state.ms);
 		return (0);
 	}
 	philos = malloc(args[N_PHILO] * sizeof(t_philo));
 	m_forks = malloc(args[N_PHILO] * sizeof(pthread_mutex_t));
 	m_tummies = malloc(args[N_PHILO] * sizeof(pthread_mutex_t));
-	m_grab = malloc(sizeof(pthread_mutex_t));
-	m_print = malloc(sizeof(pthread_mutex_t));
-	m_life = malloc(sizeof(pthread_mutex_t));
-	m_sync = malloc(sizeof(pthread_mutex_t));
-	can_print = malloc(sizeof(int));
-	life = malloc(sizeof(int));
-	update_ms = malloc(sizeof(int));
+	state.m_print = malloc(sizeof(pthread_mutex_t));
+	state.m_life = malloc(sizeof(pthread_mutex_t));
+	state.m_sync = malloc(sizeof(pthread_mutex_t));
+	state.can_print = malloc(sizeof(int));
+	state.life = malloc(sizeof(int));
+	state.update_ms = malloc(sizeof(int));
 	i = 0;
-	*can_print = 1;
-	*life = 1;
-	*update_ms = 1;
-	pthread_mutex_init(m_print, NULL);
-	pthread_mutex_init(m_life, NULL);
-	pthread_mutex_init(m_grab, NULL);
-	pthread_mutex_init(m_sync, NULL);
-	pthread_mutex_lock(m_sync);
+	*state.can_print = 1;
+	*state.life = 1;
+	*state.update_ms = 1;
+	pthread_mutex_init(state.m_print, NULL);
+	pthread_mutex_init(state.m_life, NULL);
+	pthread_mutex_init(state.m_sync, NULL);
+	pthread_mutex_lock(state.m_sync);
 	while (i < args[N_PHILO])
 	{
 		philos[i].num = i;
 		philos[i].args = args;
 		philos[i].m_rfork = m_forks + i;
-		philos[i].m_print = m_print;
 		philos[i].m_tummy = m_tummies + i;
-		philos[i].m_life = m_life;
-		philos[i].m_grab = m_grab;
-		philos[i].m_sync = m_sync;
+		philos[i].m_print = state.m_print;
+		philos[i].m_life = state.m_life;
+		philos[i].m_sync = state.m_sync;
 		philos[i].eat_count = 0;
-		philos[i].can_print = can_print;
-		philos[i].life = life;
-		philos[i].update_ms = update_ms;
+		philos[i].can_print = state.can_print;
+		philos[i].life = state.life;
+		philos[i].update_ms = state.update_ms;
 		if (i > 0)
 			philos[i].m_lfork = m_forks + i - 1;
 		pthread_mutex_init(m_forks + i, NULL);
@@ -90,17 +80,17 @@ int	main(int argc, char **argv)
 	i = 0;
 	while (i < args[N_PHILO])
 	{
-		philos[i].t0 = ms;
+		philos[i].t0 = state.ms;
 		philos[i].die_time = philos[i].args[TT_DIE];
 		pthread_create(&philos[i].thread, NULL, routine, (void *)(&philos[i]));
 		i += 2;
 	}
-	pthread_mutex_unlock(m_sync);
+	pthread_mutex_unlock(state.m_sync);
 	usleep(10000);
 	i = 1;
 	while (i < args[N_PHILO])
 	{
-		philos[i].t0 = ms;
+		philos[i].t0 = state.ms;
 		philos[i].die_time = philos[i].args[TT_DIE];
 		pthread_create(&philos[i].thread, NULL, routine, (void *)(&philos[i]));
 		i += 2;
@@ -114,19 +104,17 @@ int	main(int argc, char **argv)
 		pthread_mutex_destroy(philos[i++].m_lfork);
 		pthread_mutex_destroy(philos[i++].m_tummy);
 	}
-	pthread_mutex_destroy(m_print);
-	pthread_mutex_destroy(m_grab);
-	pthread_mutex_destroy(m_life);
+	pthread_mutex_destroy(state.m_print);
+	pthread_mutex_destroy(state.m_life);
 	free(philos);
 	free(m_forks);
 	free(m_tummies);
-	free(m_print);
-	free(m_grab);
-	free(m_life);
-	free(can_print);
-	free(life);
-	free(ms);
-	free(update_ms);
+	free(state.m_print);
+	free(state.m_life);
+	free(state.can_print);
+	free(state.life);
+	free(state.ms);
+	free(state.update_ms);
 	return (0);
 }
 
