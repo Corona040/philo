@@ -1,0 +1,6 @@
+check input
+	if n_eat = 0, do nothing
+	negative numbers!
+sync philo start
+
+norminette

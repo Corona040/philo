@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:26 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/15 18:24:08 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/15 20:22:08 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,14 +46,16 @@ typedef struct s_philo
 	pthread_mutex_t	*m_lfork;
 	pthread_mutex_t	*m_rfork;
 	pthread_mutex_t	*m_print;
-	pthread_mutex_t	*m_monitor;
+	pthread_mutex_t	*m_tummy;
 	pthread_mutex_t	*m_life;
 	pthread_mutex_t	*m_grab;
+	pthread_mutex_t	*m_sync;
 	int				eat_count;
-	size_t			t0;
+	size_t			*t0;
 	size_t			die_time;
 	int				*can_print;
 	int				*life;
+	int				*update_ms;
 }	t_philo;
 
 size_t	ft_getmsofday(void);
