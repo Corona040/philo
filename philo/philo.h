@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.h                                         /      \   /      \      */
+/*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:26 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/14 20:32:01 by eco                 \__/   \__/          */
+/*   Updated: 2024/05/15 18:24:08 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@
 typedef struct s_philo
 {
 	pthread_t		thread;
+	pthread_t		life_support;
 	int				num;
 	size_t			*args;
 	pthread_mutex_t	*m_lfork;
@@ -60,5 +61,6 @@ int		ft_msleep(size_t ms, t_philo *philo);
 void	*routine(void *arg);
 void	print_action(t_philo *philo, int print_code);
 int		monitor(t_philo *philos, pthread_mutex_t *m_monitor, pthread_mutex_t *m_print, pthread_mutex_t *m_life, int *can_print, int *life);
+void	*life_support(void *arg);
 
 #endif

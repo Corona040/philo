@@ -1,16 +1,14 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.c                                         /      \   /      \      */
+/*   philo.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 14:52:56 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/14 20:50:31 by eco                 \__/   \__/          */
+/*   Updated: 2024/05/15 18:30:20 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-//N_EAT NOT WORKING
 
 #include "philo.h"
 
@@ -111,6 +109,8 @@ int	main(int argc, char **argv)
 	free(m_forks);
 	free(m_print);
 	free(m_monitor);
+	free(m_grab);
+	free(m_life);
 	free(can_print);
 	free(life);
 	return (0);
@@ -162,6 +162,7 @@ void	*routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
+	pthread_create(&philo->life_support, NULL, life_support, (void *)philo);
 	while (1)
 	{
 		pthread_mutex_lock(philo->m_grab);
@@ -181,13 +182,14 @@ void	*routine(void *arg)
 		}
 		pthread_mutex_unlock(philo->m_grab);
 		print_action(philo, EAT);
-		pthread_mutex_lock(philo->m_monitor);
+		pthread_mutex_lock(philo->m_life);
 		philo->die_time = ft_getmsofday() - philo->t0 + philo->args[TT_DIE];
-		pthread_mutex_unlock(philo->m_monitor);
+		pthread_mutex_unlock(philo->m_life);
 		if (ft_msleep(philo->args[TT_EAT], philo))
 		{
 			pthread_mutex_unlock(philo->m_rfork);
 			pthread_mutex_unlock(philo->m_lfork);
+			pthread_join(philo->life_support, NULL);
 			return (0);
 		}
 		pthread_mutex_lock(philo->m_monitor);
@@ -196,10 +198,16 @@ void	*routine(void *arg)
 		pthread_mutex_unlock(philo->m_rfork);
 		pthread_mutex_unlock(philo->m_lfork);
 		if (philo->eat_count == philo->args[N_EAT])
+		{
+			pthread_join(philo->life_support, NULL);
 			return (0);
+		}
 		print_action(philo, SLEEP);
 		if (ft_msleep(philo->args[TT_SLEEP], philo))
+		{
+			pthread_join(philo->life_support, NULL);
 			return (0);
+		}
 		print_action(philo, THINK);
 	}
 	return (0);
@@ -227,6 +235,29 @@ void	print_action(t_philo *philo, int print_code)
 	pthread_mutex_unlock(philo->m_print);
 }
 
+void	*life_support(void *arg)
+{
+	t_philo	*philo;
+
+	philo = (t_philo *)arg;
+	while (1)
+	{
+		pthread_mutex_lock(philo->m_life);
+		if (ft_getmsofday() - philo->t0 >= philo->die_time)
+		{
+			*philo->life = 0;
+			pthread_mutex_unlock(philo->m_life);
+			pthread_mutex_lock(philo->m_print);
+			if (*philo->can_print)
+				printf("%5lu %3i has died\n", ft_getmsofday() - philo->t0, philo->num + 1);
+			*philo->can_print = 0;
+			pthread_mutex_unlock(philo->m_print);
+			return (0);
+		}
+		pthread_mutex_unlock(philo->m_life);
+	}
+}
+
 int	monitor(t_philo *philos, pthread_mutex_t *m_monitor, pthread_mutex_t *m_print, pthread_mutex_t *m_life, int *can_print, int *life)
 {
 	int	i;
@@ -236,19 +267,14 @@ int	monitor(t_philo *philos, pthread_mutex_t *m_monitor, pthread_mutex_t *m_prin
 	full_tummies = 1;
 	while (1)
 	{
-		pthread_mutex_lock(m_monitor);
-		if (ft_getmsofday() - philos[i].t0 >= philos[i].die_time)
+		pthread_mutex_lock(m_life);
+		if (!*life)
 		{
-			pthread_mutex_unlock(m_monitor);
-			pthread_mutex_lock(m_print);
-			*can_print = 0;
-			printf("%5lu %3i has died\n", ft_getmsofday() - philos[i].t0, philos[i].num + 1);
-			pthread_mutex_unlock(m_print);
-			pthread_mutex_lock(m_life);
-			*life = 0;
 			pthread_mutex_unlock(m_life);
 			return (1);
 		}
+		pthread_mutex_unlock(m_life);
+		pthread_mutex_lock(m_monitor);
 		if (philos[i].eat_count < philos[i].args[N_EAT])
 			full_tummies = 0;
 		pthread_mutex_unlock(m_monitor);
