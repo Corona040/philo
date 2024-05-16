@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 14:52:56 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/16 12:47:34 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/16 14:16:24 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,8 @@ int	main(int argc, char **argv)
 		return (0);
 	}
 	philos = malloc(args[N_PHILO] * sizeof(t_philo));
-	m_forks = malloc(args[N_PHILO] * sizeof(pthread_mutex_t));
-	m_tummies = malloc(args[N_PHILO] * sizeof(pthread_mutex_t));
+	state.m_forks = malloc(args[N_PHILO] * sizeof(pthread_mutex_t));
+	state.m_tummies = malloc(args[N_PHILO] * sizeof(pthread_mutex_t));
 	state.m_print = malloc(sizeof(pthread_mutex_t));
 	state.m_life = malloc(sizeof(pthread_mutex_t));
 	state.m_sync = malloc(sizeof(pthread_mutex_t));
@@ -57,10 +57,10 @@ int	main(int argc, char **argv)
 	pthread_mutex_lock(state.m_sync);
 	while (i < args[N_PHILO])
 	{
-		philos[i].num = i;
+		philos[i].num = i + 1;
 		philos[i].args = args;
-		philos[i].m_rfork = m_forks + i;
-		philos[i].m_tummy = m_tummies + i;
+		philos[i].m_rfork = state.m_forks + i;
+		philos[i].m_tummy = state.m_tummies + i;
 		philos[i].m_print = state.m_print;
 		philos[i].m_life = state.m_life;
 		philos[i].m_sync = state.m_sync;
@@ -69,12 +69,12 @@ int	main(int argc, char **argv)
 		philos[i].life = state.life;
 		philos[i].update_ms = state.update_ms;
 		if (i > 0)
-			philos[i].m_lfork = m_forks + i - 1;
-		pthread_mutex_init(m_forks + i, NULL);
-		pthread_mutex_init(m_tummies + i, NULL);
+			philos[i].m_lfork = state.m_forks + i - 1;
+		pthread_mutex_init(state.m_forks + i, NULL);
+		pthread_mutex_init(state.m_tummies + i, NULL);
 		i++;
 	}
-	philos[0].m_lfork = m_forks + args[N_PHILO] - 1;
+	philos[0].m_lfork = state.m_forks + args[N_PHILO] - 1;
 	i = 0;
 	while (i < args[N_PHILO])
 	{
@@ -99,14 +99,16 @@ int	main(int argc, char **argv)
 	i = 0;
 	while (i < args[N_PHILO])
 	{
-		pthread_mutex_destroy(philos[i++].m_lfork);
-		pthread_mutex_destroy(philos[i++].m_tummy);
+		pthread_mutex_destroy(state.m_forks + i);
+		pthread_mutex_destroy(state.m_tummies + i);
+		i++;
 	}
 	pthread_mutex_destroy(state.m_print);
 	pthread_mutex_destroy(state.m_life);
+	pthread_mutex_destroy(state.m_sync);
 	free(philos);
-	free(m_forks);
-	free(m_tummies);
+	free(state.m_forks);
+	free(state.m_tummies);
 	free(state.m_print);
 	free(state.m_life);
 	free(state.can_print);

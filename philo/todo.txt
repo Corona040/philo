@@ -1,6 +1,9 @@
 check input
-	if n_eat = 0, do nothing
 	negative numbers!
-sync philo start
+
+SEGFAULT odd philos
+
+min time to sleep
+	careful with time to eat < time to sleep
 
 norminette

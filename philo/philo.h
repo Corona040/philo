@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:26 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/16 12:42:17 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/16 13:47:08 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,6 @@
 # define TT_EAT 2
 # define TT_SLEEP 3
 # define N_EAT 4
-
-# define FORK 0
-# define EAT 1
-# define SLEEP 2
-# define THINK 3
 
 typedef struct s_philo
 {
@@ -70,11 +65,23 @@ typedef struct s_state
 	int				*life;
 }	t_state;
 
+/* ************************************************************************** */
+//		time.c
 size_t	ft_getmsofday(void);
 int		ft_msleep(size_t ms, t_philo *philo);
+/* ************************************************************************** */
+//		routine.c
 void	*routine(void *arg);
-void	print_action(t_philo *philo, int print_code);
-int		monitor(t_philo *philos, pthread_mutex_t *m_monitor, pthread_mutex_t *m_print, pthread_mutex_t *m_life, int *can_print, int *life);
+/* ************************************************************************** */
+//		monitor.c
 void	*life_support(void *arg);
+void	print_death(t_philo *philo);
+/* ************************************************************************** */
+//		print_action.c
+void	print_action(t_philo *philo, void (*print_act)(t_philo *));
+void	print_fork(t_philo *philo);
+void	print_eat(t_philo *philo);
+void	print_sleep(t_philo *philo);
+void	print_think(t_philo *philo);
 
 #endif
