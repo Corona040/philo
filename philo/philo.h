@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.h                                            :+:      :+:    :+:   */
+/*   philo.h                                         /      \   /      \      */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:26 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/16 20:56:58 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/16 23:46:38 by eco                 \__/   \__/          */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ typedef struct s_philo
 	pthread_mutex_t	*m_tummy;
 	pthread_mutex_t	*m_life;
 	pthread_mutex_t	*m_sync;
-	int				eat_count;
+	int				eat_c;
 	size_t			*t0;
 	size_t			die_time;
 	int				*can_print;
@@ -66,17 +66,20 @@ typedef struct s_state
 
 /* ************************************************************************** */
 //		ft_atoi.c
+int		ft_isdigit(int c);
 int		ft_atoi(const char *nptr);
 /* ************************************************************************** */
 //		philo.c
+int		check_args(int argc, char **argv);
 int		init_args(int argc, char **argv, size_t *args);
+void	start_dinner(t_philo *philos, t_state *state, size_t *args);
 /* ************************************************************************** */
 //		philo2.c
 int		lone_philo(t_state *state, size_t *args);
-void	allocate_n_set(t_philo **philos, t_state *state, size_t *args);
+int		allocate_n_set(t_philo **philos, t_state *state, size_t *args);
 void	set_philos(t_philo *philos, t_state *state, size_t *args);
-void	start_dinner(t_philo *philos, t_state *state, size_t *args);
 void	destroy_n_free(t_philo *philos, t_state *state, size_t *args);
+void	malloc_fail(t_philo *philos, t_state *state);
 /* ************************************************************************** */
 //		time.c
 size_t	ft_getmsofday(void);

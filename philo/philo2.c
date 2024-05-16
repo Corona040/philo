@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo2.c                                           :+:      :+:    :+:   */
+/*   philo2.c                                        /      \   /      \      */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 20:42:33 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/16 20:55:56 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/16 23:46:47 by eco                 \__/   \__/          */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ int	lone_philo(t_state *state, size_t *args)
 	return (0);
 }
 
-void	allocate_n_set(t_philo **philos, t_state *state, size_t *args)
+int	allocate_n_set(t_philo **philos, t_state *state, size_t *args)
 {
 	*philos = malloc(args[N_PHILO] * sizeof(t_philo));
 	state->m_forks = malloc(args[N_PHILO] * sizeof(pthread_mutex_t));
@@ -40,10 +40,15 @@ void	allocate_n_set(t_philo **philos, t_state *state, size_t *args)
 	state->ms = malloc(sizeof(size_t));
 	state->can_print = malloc(sizeof(int));
 	state->update_ms = malloc(sizeof(int));
+	if (!*philos || !state->m_forks || !state->m_tummies || !state->m_life \
+		|| !state->m_print || !state->m_sync || !state->ms \
+		|| !state->can_print || !state->update_ms)
+		return (1);
 	*state->can_print = 1;
 	*state->update_ms = 1;
 	pthread_mutex_init(state->m_print, NULL);
 	pthread_mutex_init(state->m_sync, NULL);
+	return (0);
 }
 
 void	set_philos(t_philo *philos, t_state *state, size_t *args)
@@ -60,7 +65,7 @@ void	set_philos(t_philo *philos, t_state *state, size_t *args)
 		philos[i].m_life = state->m_life + i;
 		philos[i].m_print = state->m_print;
 		philos[i].m_sync = state->m_sync;
-		philos[i].eat_count = 0;
+		philos[i].eat_c = 0;
 		philos[i].is_alive = 1;
 		philos[i].can_print = state->can_print;
 		philos[i].update_ms = state->update_ms;
@@ -72,30 +77,6 @@ void	set_philos(t_philo *philos, t_state *state, size_t *args)
 		i++;
 	}
 	philos[0].m_lfork = state->m_forks + args[N_PHILO] - 1;
-}
-
-void	start_dinner(t_philo *philos, t_state *state, size_t *args)
-{
-	int	i;
-
-	i = 0;
-	while (i < (int)args[N_PHILO])
-	{
-		philos[i].t0 = state->ms;
-		philos[i].die_time = philos[i].args[TT_DIE];
-		pthread_create(&philos[i].thread, NULL, routine, (void *)(&philos[i]));
-		i += 2;
-	}
-	pthread_mutex_unlock(state->m_sync);
-	usleep(10000);
-	i = 1;
-	while (i < (int)args[N_PHILO])
-	{
-		philos[i].t0 = state->ms;
-		philos[i].die_time = philos[i].args[TT_DIE];
-		pthread_create(&philos[i].thread, NULL, routine, (void *)(&philos[i]));
-		i += 2;
-	}
 }
 
 void	destroy_n_free(t_philo *philos, t_state *state, size_t *args)
@@ -120,4 +101,24 @@ void	destroy_n_free(t_philo *philos, t_state *state, size_t *args)
 	free(state->can_print);
 	free(state->ms);
 	free(state->update_ms);
+}
+
+void	malloc_fail(t_philo *philos, t_state *state)
+{
+	if (philos)
+		free(philos);
+	if (state->m_forks)
+		free(state->m_forks);
+	if (state->m_tummies)
+		free(state->m_tummies);
+	if (state->m_print)
+		free(state->m_print);
+	if (state->m_life)
+		free(state->m_life);
+	if (state->can_print)
+		free(state->can_print);
+	if (state->ms)
+		free(state->ms);
+	if (state->update_ms)
+		free(state->update_ms);
 }

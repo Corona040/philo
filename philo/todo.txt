@@ -1,4 +1,0 @@
-check input
-	negative numbers!
-
-protect malloc (<-- dumb)

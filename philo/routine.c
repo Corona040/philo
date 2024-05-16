@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   routine.c                                          :+:      :+:    :+:   */
+/*   routine.c                                       /      \   /      \      */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 12:45:01 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/16 20:23:22 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/16 23:46:58 by eco                 \__/   \__/          */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,9 @@ void	*routine(void *arg)
 	while (1)
 	{
 		get_forks(philo);
+		pthread_mutex_lock(philo->m_life);
+		philo->die_time = ft_getmsofday() - *philo->t0 + philo->args[TT_DIE];
+		pthread_mutex_unlock(philo->m_life);
 		if (eat_sleep(philo))
 			return (0);
 		print_think(philo);
@@ -63,23 +66,22 @@ void	get_forks(t_philo *philo)
 int	eat_sleep(t_philo *philo)
 {
 	print_eat(philo);
-	pthread_mutex_lock(philo->m_life);
-	philo->die_time = ft_getmsofday() - *philo->t0 + philo->args[TT_DIE];
-	pthread_mutex_unlock(philo->m_life);
 	if (eating(philo))
 		return (1);
 	pthread_mutex_lock(philo->m_tummy);
 	if (philo->args[N_EAT])
-		philo->eat_count++;
-	print_sleep(philo);
-	pthread_mutex_unlock(philo->m_rfork);
-	pthread_mutex_unlock(philo->m_lfork);
-	if (philo->args[N_EAT] && philo->eat_count == (int)philo->args[N_EAT])
+		philo->eat_c++;
+	if (philo->args[N_EAT] && philo->eat_c == (int)philo->args[N_EAT])
 	{
+		pthread_mutex_unlock(philo->m_rfork);
+		pthread_mutex_unlock(philo->m_lfork);
 		pthread_mutex_unlock(philo->m_tummy);
 		pthread_join(philo->life_support, NULL);
 		return (1);
 	}
+	print_sleep(philo);
+	pthread_mutex_unlock(philo->m_rfork);
+	pthread_mutex_unlock(philo->m_lfork);
 	pthread_mutex_unlock(philo->m_tummy);
 	if (ft_msleep(philo->args[TT_SLEEP], philo))
 	{
