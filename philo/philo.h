@@ -6,15 +6,13 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:26 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/16 13:47:08 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/16 20:56:58 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_H
 # define PHILO_H
 
-// memset
-# include <string.h>
 // printf
 # include <stdio.h>
 // malloc free
@@ -31,6 +29,7 @@
 # define TT_EAT 2
 # define TT_SLEEP 3
 # define N_EAT 4
+# define TT_THINK 5
 
 typedef struct s_philo
 {
@@ -48,7 +47,7 @@ typedef struct s_philo
 	size_t			*t0;
 	size_t			die_time;
 	int				*can_print;
-	int				*life;
+	int				is_alive;
 	int				*update_ms;
 }	t_philo;
 
@@ -66,12 +65,29 @@ typedef struct s_state
 }	t_state;
 
 /* ************************************************************************** */
+//		ft_atoi.c
+int		ft_atoi(const char *nptr);
+/* ************************************************************************** */
+//		philo.c
+int		init_args(int argc, char **argv, size_t *args);
+/* ************************************************************************** */
+//		philo2.c
+int		lone_philo(t_state *state, size_t *args);
+void	allocate_n_set(t_philo **philos, t_state *state, size_t *args);
+void	set_philos(t_philo *philos, t_state *state, size_t *args);
+void	start_dinner(t_philo *philos, t_state *state, size_t *args);
+void	destroy_n_free(t_philo *philos, t_state *state, size_t *args);
+/* ************************************************************************** */
 //		time.c
 size_t	ft_getmsofday(void);
 int		ft_msleep(size_t ms, t_philo *philo);
 /* ************************************************************************** */
 //		routine.c
 void	*routine(void *arg);
+void	philo_sync(t_philo *philo);
+void	get_forks(t_philo *philo);
+int		eat_sleep(t_philo *philo);
+int		eating(t_philo *philo);
 /* ************************************************************************** */
 //		monitor.c
 void	*life_support(void *arg);

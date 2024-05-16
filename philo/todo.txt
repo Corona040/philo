@@ -1,10 +1,4 @@
 check input
 	negative numbers!
 
-SEGFAULT odd philos
-
-min time to sleep (because if too many philos are available to eat at same time, a war for mutexes will break out and someone will die)
-	careful with time to eat < time to sleep
-		make min time to sleep only when time to eat is greater!
-
-norminette
+protect malloc (<-- dumb)

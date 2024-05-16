@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 12:46:48 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/16 12:46:54 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/16 19:13:33 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ int	ft_msleep(size_t ms, t_philo *philo)
 		while (ft_getmsofday() - t0 < ms)
 		{
 			pthread_mutex_lock(philo->m_life);
-			if (!*(philo->life))
+			if (!philo->is_alive)
 			{
 				pthread_mutex_unlock(philo->m_life);
 				return (1);
