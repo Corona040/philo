@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.h                                         /      \   /      \      */
+/*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 18:27:26 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/15 23:51:32 by eco                 \__/   \__/          */
+/*   Updated: 2024/05/16 12:42:17 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,8 @@ typedef struct s_philo
 
 typedef struct s_state
 {
+	pthread_mutex_t	*m_forks;
+	pthread_mutex_t	*m_tummies;
 	pthread_mutex_t	*m_print;
 	pthread_mutex_t	*m_life;
 	pthread_mutex_t	*m_sync;

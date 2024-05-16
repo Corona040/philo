@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.c                                         /      \   /      \      */
+/*   philo.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 14:52:56 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/15 23:58:17 by eco                 \__/   \__/          */
+/*   Updated: 2024/05/16 12:47:34 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,9 @@ int	main(int argc, char **argv)
 	int				i;
 	static size_t	args[5];
 	t_philo			*philos;
-	pthread_mutex_t	*m_forks;
-	pthread_mutex_t	*m_tummies;
 	t_state			state;
 
-	if (argc != 5 && argc != 6)
+	if ((argc != 5 && argc != 6) || (argc == 6 && !atoi(argv[5]))) //ATOI
 		return (0);
 	i = 0;
 	while (i++ < argc - 1)
@@ -115,172 +113,5 @@ int	main(int argc, char **argv)
 	free(state.life);
 	free(state.ms);
 	free(state.update_ms);
-	return (0);
-}
-
-size_t	ft_getmsofday(void)
-{
-	struct timeval	tv;
-	size_t			ms;
-
-	if (gettimeofday(&tv, NULL) == -1)
-		return (0);
-	ms = (size_t)tv.tv_sec * 1000;
-	ms += (size_t)tv.tv_usec / 1000;
-	return (ms);
-}
-
-int	ft_msleep(size_t ms, t_philo *philo)
-{
-	size_t	t0;
-
-	t0 = ft_getmsofday();
-	if (!philo)
-	{
-		while (ft_getmsofday() - t0 < ms)
-			usleep(500);
-	}
-	else
-	{
-		while (ft_getmsofday() - t0 < ms)
-		{
-			pthread_mutex_lock(philo->m_life);
-			if (!*(philo->life))
-			{
-				pthread_mutex_unlock(philo->m_life);
-				return (1);
-			}
-			pthread_mutex_unlock(philo->m_life);
-			usleep(500);
-		}
-	}
-	return (0);
-}
-
-void	*routine(void *arg)
-{
-	t_philo	*philo;
-
-	philo = (t_philo *)arg;
-	pthread_mutex_lock(philo->m_sync);
-	if (*philo->update_ms)
-	{
-		*philo->update_ms = 0;
-		*philo->t0 = ft_getmsofday();
-	}
-	pthread_mutex_unlock(philo->m_sync);
-	pthread_create(&philo->life_support, NULL, life_support, (void *)philo);
-	while (1)
-	{
-		if (philo->num)
-		{
-			pthread_mutex_lock(philo->m_rfork);
-			print_action(philo, FORK);
-			pthread_mutex_lock(philo->m_lfork);
-			print_action(philo, FORK);
-		}
-		else
-		{
-			pthread_mutex_lock(philo->m_lfork);
-			print_action(philo, FORK);
-			pthread_mutex_lock(philo->m_rfork);
-			print_action(philo, FORK);
-		}
-		print_action(philo, EAT);
-		pthread_mutex_lock(philo->m_life);
-		philo->die_time = ft_getmsofday() - *philo->t0 + philo->args[TT_DIE];
-		pthread_mutex_unlock(philo->m_life);
-		if (ft_msleep(philo->args[TT_EAT], philo))
-		{
-			pthread_mutex_unlock(philo->m_rfork);
-			pthread_mutex_unlock(philo->m_lfork);
-			pthread_join(philo->life_support, NULL);
-			return (0);
-		}
-		pthread_mutex_lock(philo->m_tummy);
-		philo->eat_count++;
-		pthread_mutex_unlock(philo->m_rfork);
-		pthread_mutex_unlock(philo->m_lfork);
-		if (philo->eat_count == philo->args[N_EAT])
-		{
-			pthread_mutex_unlock(philo->m_tummy);
-			pthread_join(philo->life_support, NULL);
-			return (0);
-		}
-		pthread_mutex_unlock(philo->m_tummy);
-		print_action(philo, SLEEP);
-		if (ft_msleep(philo->args[TT_SLEEP], philo))
-		{
-			pthread_join(philo->life_support, NULL);
-			return (0);
-		}
-		print_action(philo, THINK);
-	}
-	return (0);
-}
-
-void	print_action(t_philo *philo, int print_code)
-{
-	size_t	ms;
-
-	pthread_mutex_lock(philo->m_print);
-	if (*philo->can_print)
-	{
-		pthread_mutex_unlock(philo->m_print);
-		ms = ft_getmsofday();
-		if (print_code == FORK)
-		{
-			pthread_mutex_lock(philo->m_print);
-			printf("%5lu %3i has taken a fork\n", ms - *philo->t0, philo->num + 1);
-			pthread_mutex_unlock(philo->m_print);
-		}
-		else if (print_code == EAT)
-		{
-			pthread_mutex_lock(philo->m_print);
-			printf("%5lu %3i is eating\n", ms - *philo->t0, philo->num + 1);
-			pthread_mutex_unlock(philo->m_print);
-		}
-		else if (print_code == SLEEP)
-		{
-			pthread_mutex_lock(philo->m_print);
-			printf("%5lu %3i is sleeping\n", ms - *philo->t0, philo->num + 1);
-			pthread_mutex_unlock(philo->m_print);
-		}
-		else if (print_code == THINK)
-		{
-			pthread_mutex_lock(philo->m_print);
-			printf("%5lu %3i is thinking\n", ms - *philo->t0, philo->num + 1);
-			pthread_mutex_unlock(philo->m_print);
-		}
-	}
-	else
-		pthread_mutex_unlock(philo->m_print);
-}
-
-void	*life_support(void *arg)
-{
-	t_philo	*philo;
-
-	philo = (t_philo *)arg;
-	pthread_mutex_lock(philo->m_tummy);
-	while (philo->eat_count < philo->args[N_EAT])
-	{
-		pthread_mutex_unlock(philo->m_tummy);
-		pthread_mutex_lock(philo->m_life);
-		if (ft_getmsofday() - *philo->t0 >= philo->die_time)
-		{
-			*philo->life = 0;
-			pthread_mutex_unlock(philo->m_life);
-			pthread_mutex_lock(philo->m_print);
-			if (*philo->can_print)
-				printf("%5lu %3i has died\n", ft_getmsofday() - *philo->t0, philo->num + 1);
-			*philo->can_print = 0;
-			pthread_mutex_unlock(philo->m_print);
-			return (0);
-		}
-		pthread_mutex_unlock(philo->m_life);
-		pthread_mutex_lock(philo->m_tummy);
-	}
-	pthread_mutex_unlock(philo->m_tummy);
 	return (0);
 }
