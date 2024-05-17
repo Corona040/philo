@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 20:42:33 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/17 15:43:17 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/17 15:45:54 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,7 @@ void	destroy_n_free(t_philo *philos, t_state *state, size_t *args)
 	free(state->m_tummies);
 	free(state->m_print);
 	free(state->m_life);
+	free(state->m_sync);
 	free(state->can_print);
 	free(state->ms);
 	free(state->update_ms);
