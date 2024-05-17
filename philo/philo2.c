@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 20:42:33 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/17 15:45:54 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/17 15:51:42 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,8 @@ void	malloc_fail(t_philo *philos, t_state *state)
 	if (state->m_print)
 		free(state->m_print);
 	if (state->m_life)
+		free(state->m_life);
+	if (state->m_sync)
 		free(state->m_life);
 	if (state->can_print)
 		free(state->can_print);

@@ -6,7 +6,7 @@
 /*   By: ecorona- <ecorona-@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 14:52:56 by ecorona-          #+#    #+#             */
-/*   Updated: 2024/05/17 15:43:11 by ecorona-         ###   ########.fr       */
+/*   Updated: 2024/05/17 15:59:02 by ecorona-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int	main(int argc, char **argv)
 	int				i;
 	static size_t	args[6];
 	t_philo			*philos;
-	t_state			state;
+	static t_state	state;
 
 	if (check_args(argc, argv))
 		return (0);
